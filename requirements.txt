@@ -1,0 +1,6 @@
+sqlalchemy
+pymysql
+streamlit
+pandas
+python-dotenv
+workzeug
