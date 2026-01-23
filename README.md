@@ -1,29 +1,26 @@
-📦 Warehouse Management System
+## 📦 Warehouse Management System
 A full-stack Warehouse Management System (WMS) built using Python, MySQL, and Streamlit, designed to manage inventory, orders, customers, and payments efficiently with a clean database-driven architecture.
-___
 
-🚀 Features
-🔐 User Authentication & Authorization
-🏢 Organization & User Hierarchy Management
-📦 Product Inventory Management
-🛒 Order Processing System
-💳 Payment Tracking
-📊 CSV-based bulk data loading
-🗄️ MySQL Database Integration
-🖥️ Streamlit Web Interface
-⚙️ Modular CRUD Operations
-___
+## 🚀 Features 
+- 🔐 User Authentication & Authorization
+- 🏢 Organization & User Hierarchy Management
+- 📦 Product Inventory Management
+- 🛒 Order Processing System
+- 💳 Payment Tracking
+- 📊 CSV-based bulk data loading
+- 🗄️ MySQL Database Integration
+- 🖥️ Streamlit Web Interface
+- ⚙️ Modular CRUD Operations
 
-🛠️ Tech Stack
-Backend: Python
-Frontend: Streamlit
-Database: MySQL
-ORM / DB Connector: SQLAlchemy / mysql-connector
-Data Handling: Pandas
-Environment: Virtualenv
-___
+## 🛠️ Tech Stack
+- Backend: Python
+- Frontend: Streamlit
+- Database: MySQL
+- ORM / DB Connector: SQLAlchemy / mysql-connector
+- Data Handling: Pandas
+- Environment: Virtualenv
 
-📂 Project Structure
+## 📂 Project Structure
 ```bash
 warehouse_management_system/
 │
@@ -42,9 +39,8 @@ warehouse_management_system/
     ├── Payments.csv
     └── Products.csv
 ```
-___
 
-⚙️ Setup Instructions
+## ⚙️ Setup Instructions
 1️⃣ Clone the Repository
 ```bash
 git clone https://github.com/gauravxsarkar/Warehouse-Management-System.git
@@ -79,42 +75,36 @@ python create_tables.py
 ```bash
 streamlit run app.py
 ```
-___
 
-🗃️ Database Schema
+## 🗃️ Database Schema
 Entities:
-Users
-Organizations
-Directory Levels
-Customers
-Products
-Orders
-Order Items
-Payments
-Supports:
-Hierarchical organization structure
-Relational integrity using foreign keys
-___
+- Users
+- Organizations
+- Directory Levels
+- Customers
+- Products
+- Orders
+- Order Items
+- Payments
 
-📊 Sample Data
+## 📊 Sample Data
 CSV datasets provided:
-Customers.csv
-Products.csv
-Orders.csv
-OrderItems.csv
-Payments.csv
-Used for:
-Bulk ingestion
-Testing workflows
-Analytics & reporting
-___
+- Customers.csv
+- Products.csv
+- Orders.csv
+- OrderItems.csv
+- Payments.csv
+- Used for:
+- Bulk ingestion
+- Testing workflows
+- Analytics & reporting
 
-🔐 Security Features
-Environment-based DB credentials
-Password hashing (optional upgrade)
-Role-based permissions (admin / staff)
-___
+## 🔐 Security Features
+- Environment-based DB credentials
+- Password hashing (optional upgrade)
+- Role-based permissions (admin / staff)
 
-👨‍💻 Author
+## 👨‍💻 Author
 Gaurav Sarkar
+
 GitHub: https://github.com/gauravxsarkar
