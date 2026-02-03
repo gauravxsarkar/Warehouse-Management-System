@@ -149,6 +149,21 @@ def inventory_page(role):
             st.error("failed to update inventory. all fields are required.")
             st.exception(e)
 
+    st.divider()
+    st.subheader("View All Inventory")
+
+    # Show all inventory
+    query = """
+        SELECT * FROM inventory
+    """
+    inventory = run_query(engine, query, fetch=True)
+    if inventory:
+        df = pd.DataFrame(inventory)
+        st.dataframe(df)
+    else:
+        st.info("No inventory found")
+
+
 # PRODUCTS PAGE
 def products_page(role):
     st.header("Manage Products")
@@ -208,6 +223,20 @@ def products_page(role):
         delete(engine, "products", "product_id", product_id)
         st.success("Product Deleted")
 
+    st.divider()
+    st.subheader("View All Products")
+
+    # Show all products
+    query = """
+        SELECT * FROM products
+    """
+    products = run_query(engine, query, fetch=True)
+    if products:
+        df = pd.DataFrame(products)
+        st.dataframe(df)
+    else:
+        st.info("No products found")
+
 
 # WAREHOUSE PAGE
 def warehouse_page(role):
@@ -247,6 +276,20 @@ def warehouse_page(role):
     if col4.button("Delete") and role in ("admin"):
         delete(engine, "warehouse", "warehouse_id", warehouse_id)
         st.success("warehouse Deleted")
+
+    st.divider()
+    st.subheader("View All Warehouses")
+
+    # Show all warehouses
+    query = """
+        SELECT * FROM warehouse
+    """
+    warehouses = run_query(engine, query, fetch=True)
+    if warehouses:
+        df = pd.DataFrame(warehouses)
+        st.dataframe(df)
+    else:
+        st.info("No warehouse found")
 
 
 # SUPPLIERS PAGE
@@ -295,6 +338,19 @@ def suppliers_page(role):
         delete(engine, "suppliers", "supplier_id", supplier_id)
         st.success("Supplier Deleted")
 
+    st.divider()
+    st.subheader("View All Suppliers")
+
+    # Show all suppliers
+    query = """
+        SELECT * FROM suppliers
+    """
+    suppliers = run_query(engine, query, fetch=True)
+    if suppliers:
+        df = pd.DataFrame(suppliers)
+        st.dataframe(df)
+    else:
+        st.info("No warehouse found")
 
 # ORDERS PAGE
 def orders_page(role):
@@ -403,7 +459,7 @@ def order_items_page(role):
         "unit_price": unit_price
     }
     
-    col1, col2, col3 = st.columns(3)
+    col1, col2= st.columns(2)
     
     # Viewing all items for an order
     if col1.button("View Order Items"):
@@ -526,7 +582,7 @@ def payments_page(role):
         st.success("Payment Deleted")
 
 
-# PURCHASE ORDERS PAGE
+# ORDERS AND PAYMENTS PAGE
 def orders_and_payments_page(role):
 
     # View all orders
@@ -545,10 +601,13 @@ def orders_and_payments_page(role):
     """
     orders = run_query(engine, query, fetch=True)
     
+    # st.dataframe(orders)
+
     if orders:
         # Calculate balance for each order
         orders_with_balance = []
         for order in orders:
+            # order_list is recreated every loop. tabhi orders with bal is required.
             order_list = list(order)
             balance = order[4] - order[5]  # total - paid
             order_list.append(balance)
@@ -858,6 +917,20 @@ def users_page(role):
         
         delete(engine, "users", "user_id", user_id)
         st.success("User Deleted")
+
+    st.divider()
+    st.subheader("View All Users")
+    
+    # Show all users
+    query = """
+        SELECT * FROM users
+    """
+    users = run_query(engine, query, fetch=True)
+    if users:
+        df = pd.DataFrame(users)
+        st.dataframe(df)
+    else:
+        st.info("No users found")
 
 
 ##################################################################
