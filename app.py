@@ -41,7 +41,7 @@ role = user["role"]
 st.sidebar.write(f"User: {user['username']}")
 st.sidebar.write(f"Role: {role}")
 
-pages = ["Inventory","Products","Warehouse","Suppliers","Orders"]
+pages = ["Inventory","Products","Warehouse","Suppliers"]
 
 if role in ("admin","manager"):
     pages.append("Orders and Payments")
@@ -49,7 +49,6 @@ if role in ("admin","manager"):
 if role == "admin":
     pages.append("Users")
     pages.append("Order Items")
-    pages.append("Payments")
 
 page = st.sidebar.radio("Go To",pages)
 
@@ -729,10 +728,20 @@ def orders_and_payments_page(role):
     with tab2:        
         payment_order_id = st.number_input("Order ID", min_value=1, key= "payments_oid")
         amount_paid = st.number_input("Amount received", min_value=1)
+        payment_status = st.selectbox("Payment Status",["pending", "partial", "completed"])
 
         order_total = 0
         already_paid = 0
         balance = 0
+
+        payment_id = get_primarykey(engine,"payments", "payment_id",["order_id"],[order_id])
+
+        data = {
+            "order_id": order_id,
+            "amount_paid": amount_paid,
+            "payment_status": payment_status,
+            "recorded_by": st.session_state.user["user_id"]
+        }
 
         # payment summary
         if payment_order_id:
@@ -759,8 +768,10 @@ def orders_and_payments_page(role):
             st.write(f"Already Paid : {already_paid}")
             st.write(f"Balance : {balance}")
                 
+        col1, col2, col3 = st.columns(3)
+
         # Record new payment        
-        if st.button("Record Payment", key="record_payment_btn"):
+        if col1.button("Record Payment", key="record_payment_btn"):
             if not payment_order_id:
                 st.warning("Order ID required")
                 return
@@ -789,6 +800,49 @@ def orders_and_payments_page(role):
             st.success(f"Remaining: ₹{order_total - new_total_paid}")
             st.rerun()
 
+    # add
+    if col2.button("Add") and role in ("admin", "manager"):
+# /
+        # Calculate order total
+        total_query = """
+            SELECT COALESCE(SUM(quantity_ordered * unit_price), 0)
+            FROM order_items
+            WHERE order_id = :oid
+        """
+        order_total = run_query(engine, total_query, {"oid": order_id}, fetch=True)[0][0]
+        
+        if order_total == 0:
+            st.error("Cannot add payment: Order has no items")
+            return
+        
+        # Check existing payments
+        paid_query = """
+            SELECT COALESCE(SUM(amount_paid), 0)
+            FROM payments
+            WHERE order_id = :oid
+        """
+        already_paid = run_query(engine, paid_query, {"oid": order_id}, fetch=True)[0][0]
+        
+        if already_paid + amount_paid > order_total:
+            st.error(f"Payment exceeds order total. Order: ${order_total:.2f}, Already paid: ${already_paid:.2f}")
+            return
+# /      
+        data["recorded_by"] = st.session_state.user["user_id"]
+
+        try:
+            insert(engine, "payments", data)
+            st.success("Payment added")
+        except Exception as e:
+            st.error(f"Failed to add payment: {str(e)}")
+
+    # delete
+    if col3.button("Delete"):
+        if role != "admin":
+            st.error("Only admins can delete payments")
+            return
+        
+        delete(engine, "payments", "payment_id", payment_id)
+        st.success("Payment Deleted")
 
         st.divider()
         # Show payment history
@@ -958,12 +1012,12 @@ elif page == "Stock In/Out":
 elif page == "Users":
     users_page(role)
 
-elif page == "Orders":
-    orders_page(role)
+# elif page == "Orders":
+#     orders_page(role)
 
 elif page == "Order Items":
     order_items_page(role)
 
-elif page == "Payments":
-    payments_page(role)
+# elif page == "Payments":
+#     payments_page(role)
 
