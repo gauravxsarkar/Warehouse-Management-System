@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from sqlalchemy import text
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from auth import authenticate
 from db import engine
@@ -49,6 +49,7 @@ if role in ("admin","manager"):
 if role == "admin":
     pages.append("Users")
     pages.append("Order Items")
+    pages.append("Stock Movement")
 
 page = st.sidebar.radio("Go To",pages)
 
@@ -153,11 +154,12 @@ def inventory_page(role):
 
     # Show all inventory
     query = """
-        SELECT * FROM inventory
+        SELECT inventory_id, product_id, warehouse_id, stock_left, last_restocked
+        FROM inventory
     """
     inventory = run_query(engine, query, fetch=True)
     if inventory:
-        df = pd.DataFrame(inventory)
+        df = pd.DataFrame(inventory, columns=["Inventory ID", 'Product ID', 'Warehouse ID','Stock Left', 'Last Restocked'])
         st.dataframe(df)
     else:
         st.info("No inventory found")
@@ -227,11 +229,12 @@ def products_page(role):
 
     # Show all products
     query = """
-        SELECT * FROM products
+        SELECT product_id, product_name, category, unit_price, is_available, reorder_level
+        FROM products
     """
     products = run_query(engine, query, fetch=True)
     if products:
-        df = pd.DataFrame(products)
+        df = pd.DataFrame(products, columns=['Product ID','Name','Category','Unit Price', 'Available','Reorder Level'])
         st.dataframe(df)
     else:
         st.info("No products found")
@@ -243,7 +246,7 @@ def warehouse_page(role):
 
     warehouse_city = st.text_input("Warehouse City")
 
-    warehouse_total_capacity = st.number_input("Total Capacity", min_value=1)
+    warehouse_total_capacity = st.number_input("Total Capacity (in m²)", min_value=1)
 
     warehouse_id = None
     if warehouse_city:
@@ -281,11 +284,12 @@ def warehouse_page(role):
 
     # Show all warehouses
     query = """
-        SELECT * FROM warehouse
+        SELECT warehouse_id, warehouse_city, warehouse_total_capacity
+        FROM warehouse
     """
     warehouses = run_query(engine, query, fetch=True)
     if warehouses:
-        df = pd.DataFrame(warehouses)
+        df = pd.DataFrame(warehouses, columns=['Warehouse ID','Warehouse City', 'Capacity (m²)'])
         st.dataframe(df)
     else:
         st.info("No warehouse found")
@@ -342,11 +346,12 @@ def suppliers_page(role):
 
     # Show all suppliers
     query = """
-        SELECT * FROM suppliers
+        SELECT supplier_id, supplier_name, supplier_phone, supplier_email, supplier_city
+        FROM suppliers
     """
     suppliers = run_query(engine, query, fetch=True)
     if suppliers:
-        df = pd.DataFrame(suppliers)
+        df = pd.DataFrame(suppliers, columns=['Supplier ID','Name','Phone Number','Email','City'])
         st.dataframe(df)
     else:
         st.info("No warehouse found")
@@ -390,7 +395,8 @@ def order_items_page(role):
         """
         items = run_query(engine, query, {"oid": order_id}, fetch=True)
         if items:
-            st.dataframe(items)
+            df = pd.DataFrame(items, columns=['Order Item ID','Product Name', 'Order Quantity','Unit Price', 'Total'])
+            st.dataframe(df, use_container_width=True)
             
             # Show order total
             total = sum(item[4] for item in items)
@@ -469,7 +475,7 @@ def orders_and_payments_page(role):
     # TAB 1: create new order
     with tab1:        
         supplier_name = st.text_input("Supplier Name")
-        order_id = st.number_input("Order ID", min_value=1)
+        order_id = st.number_input("Order ID", min_value=0)
         order_status = st.selectbox("Order Status",["pending", "received", "cancelled"])
         
         supplier_id = None
@@ -525,7 +531,7 @@ def orders_and_payments_page(role):
         items = run_query(engine, items_query, {"oid": order_id}, fetch=True)
         
         st.write("Items in order:")
-        items_df = pd.DataFrame(items)
+        items_df = pd.DataFrame(items, columns=['Order Item ID','Product Name','Quantity Ordered','Unit Price','Total'])
         st.dataframe(items_df)
                 
         st.divider()
@@ -821,11 +827,12 @@ def users_page(role):
     
     # Show all users
     query = """
-        SELECT * FROM users
+        SELECT user_id, username, role, phone, date_joined
+        FROM users
     """
     users = run_query(engine, query, fetch=True)
     if users:
-        df = pd.DataFrame(users)
+        df = pd.DataFrame(users, columns=['User ID','Username','Role','Phone','Date Joined'])
         st.dataframe(df)
     else:
         st.info("No users found")
@@ -850,7 +857,7 @@ elif page == "Suppliers":
 elif page == "Orders and Payments":
     orders_and_payments_page(role)
 
-elif page == "Stock In/Out":
+elif page == "Stock Movement":
     stock_movement_page(role)
 
 elif page == "Users":
