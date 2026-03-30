@@ -67,3 +67,51 @@ def get_col(engine, table, column_to_get, search_column, search_value):
     if rows:
         return rows[0][0]
     return None
+
+def move_stock(engine, product_id, warehouse_id, movement_type, quantity, user_id):
+    if quantity <= 0:
+        raise ValueError("Quantity must be positive")
+    
+    with engine.begin() as conn:
+        query = '''
+            INSERT INTO stock_movement(product_id, warehouse_id, movement_type, quantity, performed_by)
+            VALUES (:p, :w, :t, :q, :u)
+        '''
+        
+        conn.execute(text(query), {
+                                "p": product_id,
+                                "w": warehouse_id,
+                                "t": movement_type,
+                                "q": quantity,
+                                "u": user_id         
+                                        })
+    
+        if movement_type == "in":
+            query= '''
+                UPDATE inventory
+                SET stock_left = stock_left + :q
+                WHERE product_id = :p and warehouse_id = :w  
+                '''
+
+            conn.execute(text(query), {"q": quantity, "p": product_id, "w": warehouse_id})
+
+        else:
+            query = """
+                SELECT stock_left
+                FROM inventory
+                WHERE product_id = :p AND warehouse_id = :w
+                FOR UPDATE
+                """
+            
+            result = conn.execute(text(query), {"p": product_id, "w": warehouse_id}).fetchone()
+
+            if not result or result.stock_left < quantity:
+                raise ValueError("Insufficient stock")
+
+            query = '''
+                UPDATE inventory
+                SET stock_left = stock_left - :q
+                WHERE product_id = :p and warehouse_id = :w  
+                '''
+            
+            conn.execute(text(query), {"q": quantity, "p": product_id, "w": warehouse_id})

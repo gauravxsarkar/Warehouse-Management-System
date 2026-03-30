@@ -1,11 +1,10 @@
 import streamlit as st
 import pandas as pd
-from sqlalchemy import text
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 
 from auth import authenticate
 from db import engine
-from crud_functions import (run_query, view, insert, update, delete, get_primarykey, get_col)
+from crud_functions import (run_query, view, insert, update, delete, get_primarykey, get_col, move_stock)
 
 # session initialisation
 if "logged_in" not in st.session_state:

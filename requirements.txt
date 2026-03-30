@@ -3,4 +3,5 @@ pymysql
 streamlit
 pandas
 python-dotenv
-workzeug
+werkzeug
+cryptography

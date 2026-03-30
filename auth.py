@@ -18,7 +18,7 @@ def authenticate(username, password):
     if not user:
         return None
 
-    if check_password_hash(user.password_hash, password):
+    if check_password_hash(user.password, password):
         return {
             "user_id": user.user_id,
             "username": user.username,
